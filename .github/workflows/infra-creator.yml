@@ -2,11 +2,10 @@ name: infra creation
 on:
   push:
     branches:
-      - demo
       - feature-demo
+      - main
   pull_request:
     branches:
-      - demo
       - feature-demo
 
 
@@ -24,7 +23,7 @@ env:
 jobs:
   lint-and-security:
     name: Lint and Security Checks
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./Infra
@@ -54,8 +53,8 @@ jobs:
 
 
   terraform-plan_apply:
-    if: github.event_name == 'pull_request'
-    runs-on: self-hosted
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     needs: lint-and-security
     name: Terraform Plan
     defaults:
@@ -80,11 +79,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
 
       - name: Initialize Terraform
         run: terraform init -reconfigure
@@ -131,7 +125,7 @@ jobs:
           number: ${{ github.event.pull_request.number }}
         
       - name: Applying Terraform after PR Merge
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           terraform init
           terraform apply -auto-approve
