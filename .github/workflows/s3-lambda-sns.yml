@@ -2,11 +2,11 @@ name: infra creation
 on:
   push:
     branches:
-      - devops979-patch-4
+      - feature-demo
       - main
   pull_request:
     branches:
-      - devops979-patch-4
+      - feature-demo
 
 
 permissions:
