@@ -2,10 +2,11 @@ name: infra creation
 on:
   push:
     branches:
-      - feature-demo
+      - devops979-patch-4
+      - main
   pull_request:
     branches:
-      - feature-demo
+      - devops979-patch-4
 
 
 permissions:
@@ -52,7 +53,7 @@ jobs:
 
 
   terraform-plan_apply:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: lint-and-security
     name: Terraform Plan
@@ -124,7 +125,7 @@ jobs:
           number: ${{ github.event.pull_request.number }}
         
       - name: Applying Terraform after PR Merge
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           terraform init
           terraform apply -auto-approve
