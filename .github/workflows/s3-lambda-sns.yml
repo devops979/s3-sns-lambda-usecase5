@@ -2,10 +2,10 @@ name: infra creation
 on:
   push:
     branches:
-      - main
+      - demo
   pull_request:
     branches:
-      - main
+      - demo
 
 
 permissions:
