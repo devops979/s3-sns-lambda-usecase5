@@ -19,6 +19,7 @@ env:
   AWS_REGION: "ap-south-1"
   AWS_ROLE_ARN: "arn:aws:iam::211125325699:role/Demo_Access"  
 
+
 jobs:
   lint-and-security:
     name: Lint and Security Checks
