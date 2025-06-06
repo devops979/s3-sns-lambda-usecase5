@@ -2,8 +2,7 @@ name: infra creation
 on:
   push:
     branches:
-      - feature-demo
-      - main
+      - demo
   pull_request:
     branches:
       - feature-demo
@@ -20,10 +19,12 @@ env:
   AWS_REGION: "ap-south-1"
   AWS_ROLE_ARN: "arn:aws:iam::211125325699:role/Demo_Access"  
 
+
 jobs:
   lint-and-security:
     name: Lint and Security Checks
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: ./Infra
@@ -53,7 +54,7 @@ jobs:
 
 
   terraform-plan_apply:
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     needs: lint-and-security
     name: Terraform Plan
@@ -95,7 +96,7 @@ jobs:
         run: terraform validate
 
       - name: Generate Terraform Plan
-        run: terraform plan -out=tfplan
+        run: terraform plan
 
       - name: Generate Markdown with Terraform Docs
         if: github.event_name == 'push' || github.event_name == 'pull_request'
@@ -104,7 +105,7 @@ jobs:
           working-dir: ./Infra
           output-file: README.md
           output-method: inject
-          git-push: true
+          git-push: false
           config-file: .terraform-docs.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -125,7 +126,7 @@ jobs:
           number: ${{ github.event.pull_request.number }}
         
       - name: Applying Terraform after PR Merge
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/demo'
         run: |
           terraform init
           terraform apply -auto-approve
